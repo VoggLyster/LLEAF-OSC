@@ -48,6 +48,7 @@ void ofApp::update() {
 	{
 		calculateDescriptors();
 		scaleDescriptors();
+		calculateEffortMetaData();
 		sendDescriptorsViaOSC();
 	}
 
@@ -115,10 +116,14 @@ void ofApp::draw() {
 		rawLeapImage.draw(0, 0);
 	 //Uncomment for debugging:
 	
-	string debug = "Flow: " + ofToString(flow[0]) + ", Time: " + ofToString(time[0]) + ", Space: " + ofToString(space[0]) + ", Weight: "
+	string debug = /*"Flow: " + ofToString(flow[0]) + ", Time: " + ofToString(time[0]) + ", Space: " + ofToString(space[0]) + ", Weight: "
 		+ ofToString(weight[0]) + ", QoM: " + ofToString(qOM[0]) + ", hands present: " + ofToString(handsPresent)
 		+ "\nMaxValues: Flow: " + ofToString(flowMax) + ", Time: " + ofToString(timeMax) + ", Space: " + ofToString(spaceMax) + ", Weight: " + ofToString(weightMax)
-		+ "\nScaledValues: Flow: " + ofToString(flowScaled[0]) + ", Time: " + ofToString(timeScaled[0]) + ", Space: " + ofToString(spaceScaled[0]) + ", Weight: " + ofToString(weightScaled[0]);
+		+ "\nScaledValues: Flow: " + ofToString(flowScaled[0]) + ", Time: " + ofToString(timeScaled[0]) + ", Space: " + ofToString(spaceScaled[0]) + ", Weight: " + ofToString(weightScaled[0]);*/
+		"Flow: " + ofToString(flow[0]) + "\nTime: " + ofToString(time[0]) + "\nSpace: " + ofToString(space[0]) + "\nWeight: "
+		+ ofToString(weight[0]) + "\nQoM: " + ofToString(qOM[0]) + ", hands present: " + ofToString(handsPresent)
+		+ "\nfilter: " + ofToString(filter[0]) + "\nrhythm: " + ofToString(rhythm[0]) + "\_free_: " + ofToString(_free_[0])
+		+ "\ndepth: " + ofToString(depth[0]) + "\nmodulation: " + ofToString(modulation[0]) + "\nreverb: " + ofToString(reverb[0]);
 
 	ofDrawBitmapString(debug, 100, 100);
 	
@@ -245,9 +250,16 @@ void ofApp::scaleDescriptors()
 	}
 }
 
-void ofApp::calculateControlValues()
+void ofApp::calculateEffortMetaData()
 {
-
+	for (int h = 0; h < MAX_HANDS; h++) {
+		filter[h] = (spaceScaled[h]);
+		rhythm[h] = (flowScaled[h]);
+		_free_[h] = 0;
+		depth[h] = (weightScaled[h]);
+		modulation[h] = (timeScaled[h]);
+		reverb[h] = (timeScaled[h] + flowScaled[h] + spaceScaled[h]) / 3;
+	}
 }
 
 void ofApp::updateVectors() 
@@ -358,7 +370,7 @@ void ofApp::calculateWeightEffort()
 	float alpha[6] = { 1, 1, 1, 0, 0, 4 };
 
 	for (int h = 0; h < MAX_HANDS; h++) {
-		if (handsPresent >= h) {
+		if (handsPresent > h) {
 			float val = 0;
 
 			for (int j = 0; j < numJoints; j++)
@@ -389,7 +401,7 @@ void ofApp::calculateWeightEffort()
 void ofApp::calculateTimeEffort() 
 {
 	for (int h = 0; h < MAX_HANDS; h++) {
-		if (handsPresent >= h) {
+		if (handsPresent > h) {
 			int j = 0;
 
 			// Vector of weigthing factors (thumb, index, middle, ring, pinky, palm for both hands)
@@ -425,7 +437,7 @@ void ofApp::calculateFlowEffort()
 	float alpha[6] = { 1, 1, 1, 0, 0, 1 };
 
 	for (int h = 0; h < MAX_HANDS; h++) {
-		if (handsPresent >= h) {
+		if (handsPresent > h) {
 			int j = 0;
 			float val = 0;
 
@@ -455,7 +467,7 @@ void ofApp::calculateSpaceEffort()
 	float alpha[6] = { 1, 5, 1, 0, 0, 1 };
 
 	for (int h = 0; h < MAX_HANDS; h++) {
-		if (handsPresent >= h) {
+		if (handsPresent > h) {
 			float num = 0;
 			float den = 0;
 			space[h] = 0;
@@ -506,27 +518,15 @@ void ofApp::sendDescriptorsViaOSC()
 		string address = "/efforts" + ofToString(i);
 		m0.setAddress(address);
 
-		if (!spatialMode)
-		{
-			m0.addFloatArg(flowScaled[i]);
-			m0.addFloatArg(timeScaled[i]);
-			m0.addFloatArg(weightScaled[i]);
-			m0.addFloatArg(spaceScaled[i]);
-			m0.addFloatArg(qOM[i]);
-			int handPresent = (handsPresent > i) ? 1 : 0;
-			m0.addIntArg(handPresent);
-		}
-
-		//else
-		//{
-		//	m0.addFloatArg(jointPos[jointPos.size() - 1 - 6].x);
-		//	m0.addFloatArg(jointPos[jointPos.size() - 1 - 6].y);
-		//	m0.addFloatArg(jointPos[jointPos.size() - 1 - 6].z);
-		//	m0.addFloatArg(jointPos[jointPos.size() - 1].x);
-		//	m0.addFloatArg(jointPos[jointPos.size() - 1].y);
-		//	m0.addFloatArg(jointPos[jointPos.size() - 1].z);
-		//}
-
+		m0.addFloatArg(filter[i]);
+		m0.addFloatArg(rhythm[i]);
+		m0.addFloatArg(_free_[i]);
+		m0.addFloatArg(depth[i]);
+		m0.addFloatArg(modulation[i]);
+		m0.addFloatArg(reverb[i]);
+		m0.addFloatArg(qOM[i]);
+		int handPresent = (handsPresent > i) ? 1 : 0;
+		m0.addIntArg(handPresent);
 		sender.sendMessage(m0);
 	}
 

@@ -53,17 +53,26 @@ public:
 	float weight[MAX_HANDS];
 	float weightUpperBounds = 500.0; // Based on max value over time
 	float time[MAX_HANDS];
-	float timeUpperBounds = 4000.0;
+	float timeUpperBounds = 2000.0;
 	float space[MAX_HANDS];
-	float spaceUpperBounds = 700.0;
+	float spaceUpperBounds = 500.0;
 	float flow[MAX_HANDS];
-	float flowUpperBounds = 76000.0;
+	float flowUpperBounds = 10000.0;
 	float weightMax, timeMax, spaceMax, flowMax = 0.0;
 	float weightScaled[MAX_HANDS], timeScaled[MAX_HANDS], spaceScaled[MAX_HANDS], flowScaled[MAX_HANDS];
 	std::vector<float> weightVector[MAX_HANDS];
+
+	// Effort meta data
+	float filter[MAX_HANDS];
+	float rhythm[MAX_HANDS];
+	float _free_[MAX_HANDS];
+	float depth[MAX_HANDS];
+	float modulation[MAX_HANDS];
+	float reverb[MAX_HANDS];
+
 	void calculateDescriptors();
 	void scaleDescriptors();
-	void calculateControlValues();
+	void calculateEffortMetaData();
 	void updateVectors();
 	void updateVectorsWithSmoothing();
 	void calculateQOM();
