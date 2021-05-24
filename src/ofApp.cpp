@@ -120,9 +120,9 @@ void ofApp::draw() {
 		+ ofToString(weight[0]) + ", QoM: " + ofToString(qOM[0]) + ", hands present: " + ofToString(handsPresent)
 		+ "\nMaxValues: Flow: " + ofToString(flowMax) + ", Time: " + ofToString(timeMax) + ", Space: " + ofToString(spaceMax) + ", Weight: " + ofToString(weightMax)
 		+ "\nScaledValues: Flow: " + ofToString(flowScaled[0]) + ", Time: " + ofToString(timeScaled[0]) + ", Space: " + ofToString(spaceScaled[0]) + ", Weight: " + ofToString(weightScaled[0]);*/
-		"Flow: " + ofToString(flow[0]) + "\nTime: " + ofToString(time[0]) + "\nSpace: " + ofToString(space[0]) + "\nWeight: "
-		+ ofToString(weight[0]) + "\nQoM: " + ofToString(qOM[0]) + ", hands present: " + ofToString(handsPresent)
-		+ "\nfilter: " + ofToString(filter[0]) + "\nrhythm: " + ofToString(rhythm[0]) + "\_free_: " + ofToString(_free_[0])
+		"Flow: " + ofToString(flowScaled[0]) + "\nTime: " + ofToString(timeScaled[0]) + "\nSpace: " + ofToString(spaceScaled[0]) + "\nWeight: "
+		+ ofToString(weightScaled[0]) + "\nQoM: " + ofToString(qOM[0]) + ", hands present: " + ofToString(handsPresent)
+		+ "\nfilter: " + ofToString(filter[0]) + "\nrhythm: " + ofToString(rhythm[0]) + "\n_free_: " + ofToString(_free_[0])
 		+ "\ndepth: " + ofToString(depth[0]) + "\nmodulation: " + ofToString(modulation[0]) + "\nreverb: " + ofToString(reverb[0]);
 
 	ofDrawBitmapString(debug, 100, 100);
@@ -247,6 +247,7 @@ void ofApp::scaleDescriptors()
 		timeScaled[i] = time[i] / timeUpperBounds;
 		weightScaled[i] = weight[i] / weightUpperBounds;
 		spaceScaled[i] = space[i] / spaceUpperBounds;
+		QoMScaled[i] = qOM[i] / QoMUpperBounds;
 	}
 }
 
@@ -366,7 +367,7 @@ void ofApp::calculateQOM()
 
 void ofApp::calculateWeightEffort() 
 {	
-	// Vector of weigthing factors (thumb, index, middle, ring, pinky, palm for both hands)
+	// Vector of weigthing factors (thumb, index, middle, ring, pinky, palm)
 	float alpha[6] = { 1, 1, 1, 0, 0, 4 };
 
 	for (int h = 0; h < MAX_HANDS; h++) {
@@ -393,7 +394,6 @@ void ofApp::calculateWeightEffort()
 		}
 
 	} 
-
 
 	weightMax = MAX(weight[0], weightMax);
 }
@@ -524,10 +524,21 @@ void ofApp::sendDescriptorsViaOSC()
 		m0.addFloatArg(depth[i]);
 		m0.addFloatArg(modulation[i]);
 		m0.addFloatArg(reverb[i]);
-		m0.addFloatArg(qOM[i]);
+		m0.addFloatArg(QoMScaled[i]);
 		int handPresent = (handsPresent > i) ? 1 : 0;
 		m0.addIntArg(handPresent);
 		sender.sendMessage(m0);
+
+		//ofxOscMessage m1;
+		//address = "/pureEfforts" + ofToString(i);
+		//m1.setAddress(address);
+		//m1.addFloatArg(spaceScaled[i]);
+		//m1.addFloatArg(flowScaled[i]);
+		//m1.addFloatArg(weightScaled[i]);
+		//m1.addFloatArg(timeScaled[i]);
+		//m1.addFloatArg(QoMScaled[i]);
+
+		//sender.sendMessage(m1);
 	}
 
 	frameReady = false;

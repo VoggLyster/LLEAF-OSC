@@ -55,11 +55,12 @@ public:
 	float time[MAX_HANDS];
 	float timeUpperBounds = 2000.0;
 	float space[MAX_HANDS];
-	float spaceUpperBounds = 500.0;
+	float spaceUpperBounds = 300.0;
 	float flow[MAX_HANDS];
-	float flowUpperBounds = 10000.0;
+	float flowUpperBounds = 25000.0;
+	float QoMUpperBounds = 10.0;
 	float weightMax, timeMax, spaceMax, flowMax = 0.0;
-	float weightScaled[MAX_HANDS], timeScaled[MAX_HANDS], spaceScaled[MAX_HANDS], flowScaled[MAX_HANDS];
+	float weightScaled[MAX_HANDS], timeScaled[MAX_HANDS], spaceScaled[MAX_HANDS], flowScaled[MAX_HANDS], QoMScaled[MAX_HANDS];
 	std::vector<float> weightVector[MAX_HANDS];
 
 	// Effort meta data
