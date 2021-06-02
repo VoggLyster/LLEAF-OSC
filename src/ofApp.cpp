@@ -383,9 +383,7 @@ void ofApp::calculateWeightEffort()
 			// update vector
 			for (int j = numFrames - 1; j >= 1; j--)
 				weightVector[h][j - 1] = weightVector[h][j];
-
 			weightVector[h][numFrames - 1] = val;
-
 			weight[h] = *std::max_element(weightVector[h].begin(), weightVector[h].end());
 
 		}
@@ -409,14 +407,14 @@ void ofApp::calculateTimeEffort()
 
 			float val = 0;
 
-			for (int i = jointAcc[h].size() - (20 * numJoints); i < jointAcc[h].size() - (10 * numJoints); i++) {
+			for (int i = 0; i < numFrames*numJoints; i++) {
 				float mag = 0.001 * jointAcc[h][i].magnitude();
 				val += alpha[j++] * mag;
-				j %= 6;
+				j %= numJoints;
 			}
 
 			j = 0;
-			time[h] = val / 20.0;
+			time[h] = val / numFrames;
 
 			if (!std::isfinite(time[h]))
 				time[h] = 0.0;
@@ -441,7 +439,7 @@ void ofApp::calculateFlowEffort()
 			int j = 0;
 			float val = 0;
 
-			for (int i = jointJerk[h].size() - (20 * numJoints); i < jointJerk[h].size() - (10 * numJoints); i++) {
+			for (int i = 0; i < numFrames * numJoints; i++) {
 				float mag = 0.001 * jointJerk[h][i].magnitude();
 				val += alpha[j++] * mag;
 				j %= 6;
@@ -475,17 +473,16 @@ void ofApp::calculateSpaceEffort()
 			for (int i = 0; i < numJoints; i++) {
 				LeapJoint diff;
 
-				for (int j = 0; j < 10; j++) {
+				for (int j = 0; j < 19; j++) {
 					diff = jointPos[h][i + (1 + j) * numJoints] - jointPos[h][i + j * numJoints];
 					num += diff.magnitude();
 				}
 
-				diff = jointPos[h][i] - jointPos[h][i + 10 * numJoints];
+				diff = jointPos[h][i] - jointPos[h][i + (numFrames-1) * numJoints];
 				den = diff.magnitude();
 
 				space[h] += alpha[i] * num / (den + 1.0e-9); // Add 1e-9 to avoid nan
 			}
-
 
 			if (!std::isfinite(space[h]))
 				space[h] = 500.0;
