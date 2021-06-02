@@ -528,17 +528,6 @@ void ofApp::sendDescriptorsViaOSC()
 		int handPresent = (handsPresent > i) ? 1 : 0;
 		m0.addIntArg(handPresent);
 		sender.sendMessage(m0);
-
-		//ofxOscMessage m1;
-		//address = "/pureEfforts" + ofToString(i);
-		//m1.setAddress(address);
-		//m1.addFloatArg(spaceScaled[i]);
-		//m1.addFloatArg(flowScaled[i]);
-		//m1.addFloatArg(weightScaled[i]);
-		//m1.addFloatArg(timeScaled[i]);
-		//m1.addFloatArg(QoMScaled[i]);
-
-		//sender.sendMessage(m1);
 	}
 
 	frameReady = false;
